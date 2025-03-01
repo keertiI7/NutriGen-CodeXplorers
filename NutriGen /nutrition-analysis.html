@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriGen - Food Nutrition Analysis</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-light: #81C784;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --text-dark: #333;
+            --text-light: #fff;
+            --background: #f9f9f9;
+            --card-bg: #fff;
+            --border: #ddd;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-left:0;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: var(--text-light);
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0auto;
+            padding: 1rem;
+            margin-left:250px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-link {
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 3px solid transparent;
+        }
+        
+        .nav-link.active {
+            border-bottom: 3px solid var(--secondary);
+            color: var(--primary-dark);
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        h2 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: var(--text-light);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .loader::after {
+            content: "";
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid var(--primary-light);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: crimson;
+            margin: 1rem 0;
+        }
+        
+        .nutrition-result {
+            margin-top: 2rem;
+        }
+        
+        .nutrient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .nutrient-item {
+            background-color: var(--primary-light);
+            color: var(--text-light);
+            padding: 1rem;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        @media (max-width: 768px) {
+            .nutrient-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation-container"></div>
+    <!-- <header>
+        <div class="container">
+            <h1>NutriGen</h1>
+            <p>AI-Powered Nutrition Assistant</p>
+        </div>
+    </header> -->
+    
+    <div class="container">
+        <!-- <nav> -->
+            <!-- <a href="index.html" class="nav-link active">Food Nutrition Analysis</a> -->
+            <!-- <a href="meal-planning.html" class="nav-link">AI Meal Planning</a> -->
+        <!-- </nav> -->
+        
+        <div class="card">
+            <h2>Analyze Food Nutrition</h2>
+            <p>Enter a food item or dish to get detailed nutritional information</p>
+            
+            <form id="nutrition-form">
+                <input type="text" id="food-input" placeholder="E.g. 100g of chicken breast, 1 medium apple, etc." required>
+                <button type="submit">Analyze</button>
+            </form>
+            
+            <div id="nutrition-loader" class="loader"></div>
+            <div id="nutrition-error" class="error"></div>
+            
+            <div id="nutrition-result" class="nutrition-result"></div>
+        </div>
+    </div>
+    
+    <script>
+        // API Configuration - Updated to use current Gemini API
+        const API_KEY = "AIzaSyDat41Ezuw-PU4SCWU7I-7mJfqL8IlI5Z4"; // Replace with your actual API key
+        // Using the current Gemini API endpoint and model name
+        const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent";
+        
+        // Nutrition Analysis Form
+        document.getElementById('nutrition-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const foodInput = document.getElementById('food-input').value;
+            if (!foodInput) return;
+            
+            const loader = document.getElementById('nutrition-loader');
+            const errorDiv = document.getElementById('nutrition-error');
+            const resultDiv = document.getElementById('nutrition-result');
+            
+            loader.style.display = 'block';
+            errorDiv.textContent = '';
+            resultDiv.innerHTML = '';
+            
+            try {
+                const nutritionData = await getNutritionData(foodInput);
+                displayNutritionData(nutritionData, resultDiv);
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message || 'Failed to analyze food. Please try again.'}`;
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+        
+        // API Functions
+        async function getNutritionData(foodItem) {
+            const prompt = `
+                Provide detailed nutritional information for ${foodItem}.
+                Format the response as a JSON object with the following structure:
+                {
+                    "foodName": "name of the food",
+                    "servingSize": "standard serving size",
+                    "calories": number,
+                    "macronutrients": {
+                        "protein": {"amount": number, "unit": "g"},
+                        "carbohydrates": {"amount": number, "unit": "g"},
+                        "fat": {"amount": number, "unit": "g"},
+                        "fiber": {"amount": number, "unit": "g"},
+                        "sugar": {"amount": number, "unit": "g"}
+                    },
+                    "micronutrients": [
+                        {"name": "Vitamin A", "amount": number, "unit": "μg/mg"},
+                        {"name": "Vitamin C", "amount": number, "unit": "mg"}
+                    ],
+                    "healthBenefits": ["benefit 1", "benefit 2"],
+                    "dietaryConsiderations": ["consideration 1", "consideration 2"]
+                }
+                Provide accurate nutritional data based on reliable sources. Make sure the JSON is valid and properly formatted.
+            `;
+            
+            return await callGeminiAPI(prompt);
+        }
+        
+        async function callGeminiAPI(prompt) {
+            try {
+                const response = await fetch(`${API_ENDPOINT}?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || 'API request failed');
+                }
+
+                const data = await response.json();
+                const textResponse = data.candidates[0].content.parts[0].text;
+
+                let jsonStr = textResponse;
+
+                // Improved JSON extraction
+                const jsonMatch = textResponse.match(/(\{[\s\S]*\})/);
+                if (jsonMatch && jsonMatch[1]) {
+                    jsonStr = jsonMatch[1];
+                } else {
+                    console.error("Failed to find JSON object in API response:", textResponse);
+                    throw new Error("Failed to extract JSON from API response.");
+                }
+
+                // Cleaning JSON string
+                jsonStr = jsonStr
+                    .replace(/\/\/.*$/gm, '') // Remove JavaScript-style comments
+                    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove multi-line comments
+                    .replace(/,(\s*[\]}])/g, '$1'); // Remove trailing commas
+
+                try {
+                    return JSON.parse(jsonStr);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError, "JSON string:", jsonStr);
+                    throw new Error('Failed to parse API response. The response format was invalid.');
+                }
+            } catch (error) {
+                console.error('API call error:', error);
+                throw error;
+            }
+        }
+        
+        // Display Functions
+        function displayNutritionData(data, container) {
+            container.innerHTML = `
+                <h3>${data.foodName}</h3>
+                <p><strong>Serving Size:</strong> ${data.servingSize}</p>
+                <p><strong>Calories:</strong> ${data.calories}</p>
+                
+                <h4>Macronutrients</h4>
+                <div class="nutrient-grid">
+                    <div class="nutrient-item">
+                        <span>Protein</span>
+                        <span>${data.macronutrients.protein.amount}${data.macronutrients.protein.unit}</span>
+                    </div>
+                    <div class="nutrient-item">
+                        <span>Carbohydrates</span>
+                        <span>${data.macronutrients.carbohydrates.amount}${data.macronutrients.carbohydrates.unit}</span>
+                    </div>
+                    <div class="nutrient-item">
+                        <span>Fat</span>
+                        <span>${data.macronutrients.fat.amount}${data.macronutrients.fat.unit}</span>
+                    </div>
+                    <div class="nutrient-item">
+                        <span>Fiber</span>
+                        <span>${data.macronutrients.fiber.amount}${data.macronutrients.fiber.unit}</span>
+                    </div>
+                    <div class="nutrient-item">
+                        <span>Sugar</span>
+                        <span>${data.macronutrients.sugar.amount}${data.macronutrients.sugar.unit}</span>
+                    </div>
+                </div>
+                
+                <h4>Micronutrients</h4>
+                <div class="nutrient-grid">
+                    ${data.micronutrients.map(nutrient => `
+                        <div class="nutrient-item">
+                            <span>${nutrient.name}</span>
+                            <span>${nutrient.amount}${nutrient.unit}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <h4>Health Benefits</h4>
+                <ul>
+                    ${data.healthBenefits.map(benefit => `<li>${benefit}</li>`).join('')}
+                </ul>
+                
+                <h4>Dietary Considerations</h4>
+                <ul>
+                    ${data.dietaryConsiderations.map(consideration => `<li>${consideration}</li>`).join('')}
+                </ul>
+            `;
+        }
+        fetch('navigation.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navigation-container').innerHTML = data;
+                setActiveNavLink();
+            });
+
+        function setActiveNavLink() {
+            const path = window.location.pathname;
+            const page = path.split("/").pop();
+            document.querySelectorAll('.nav-item a').forEach(link => {
+                if (link.getAttribute('href') === page) {
+                    link.parentElement.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
