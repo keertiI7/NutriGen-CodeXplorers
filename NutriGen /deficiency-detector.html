@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriDetect - AI Supplement & Deficiency Detection</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loader::after {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #81C784;
+            border-radius: 50%;
+            border-top-color: #4CAF50;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            margin-bottom: 15px;
+        }
+
+        .result-section h3 {
+            color: #388E3C;
+            margin-bottom: 5px;
+        }
+
+        .result-section ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="navigation-container"></div>
+    <div class="container">
+        <h2>NutriDetect 🩺</h2>
+        <label for="healthConditions">Health Conditions:</label>
+        <textarea id="healthConditions" placeholder="Enter your health conditions..."></textarea>
+
+        <label for="labReports">Lab Reports (Optional):</label>
+        <textarea id="labReports" placeholder="Enter your lab report details..."></textarea>
+
+        <label for="dietHistory">Diet History:</label>
+        <textarea id="dietHistory" placeholder="Enter your diet history..."></textarea>
+
+        <button onclick="analyzeData()">Analyze</button>
+
+        <div class="loader" id="loading-indicator"></div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_KEY = "AIzaSyDat41Ezuw-PU4SCWU7I-7mJfqL8IlI5Z4"; // Replace with your actual API key
+        const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent";
+
+        async function analyzeData() {
+            const healthConditions = document.getElementById('healthConditions').value;
+            const labReports = document.getElementById('labReports').value;
+            const dietHistory = document.getElementById('dietHistory').value;
+            const resultDiv = document.getElementById('result');
+            const loadingIndicator = document.getElementById('loading-indicator');
+
+            resultDiv.innerHTML = '';
+            loadingIndicator.style.display = 'block';
+
+            const prompt = `
+                Analyze the following health information and provide potential vitamin/mineral deficiencies, and suggest personalized supplements or food sources.
+
+                Health Conditions: ${healthConditions || 'None'}
+                Lab Reports: ${labReports || 'None'}
+                Diet History: ${dietHistory || 'None'}
+
+                Format the response as follows:
+
+                Potential Deficiencies:
+                - Deficiency 1 💊
+                - Deficiency 2 🥦
+
+                Suggested Supplements/Food Sources:
+                - Supplement/Food 1: Description 🍎
+                - Supplement/Food 2: Description 🐟
+
+                Additional Notes:
+                - Note 1 📝
+                - Note 2 💡
+            `;
+
+            try {
+                const response = await getGeminiResponse(prompt);
+                displayResult(response, resultDiv);
+            } catch (error) {
+                resultDiv.innerHTML = `<p>Error: ${error.message || 'Failed to analyze data.'}</p>`;
+                console.error("Gemini API Error:", error);
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        async function getGeminiResponse(prompt) {
+            try {
+                const response = await fetch(`${API_ENDPOINT}?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }]
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || 'API request failed');
+                }
+
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        function displayResult(responseText, resultDiv) {
+            const sections = responseText.split('\n\n');
+            let html = '';
+
+            sections.forEach(section => {
+                const lines = section.split('\n');
+                const title = lines[0];
+                const items = lines.slice(1).filter(line => line.trim() !== '');
+
+                if (items.length > 0) {
+                    html += `<div class="result-section"><h3>${title}</h3><ul>`;
+                    items.forEach(item => {
+                        html += `<li>${item.replace(/^\s*-\s*/, '')}</li>`;
+                    });
+                    html += `</ul></div>`;
+                }
+            });
+
+            resultDiv.innerHTML = html;
+        }
+        fetch('navigation.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navigation-container').innerHTML = data;
+                setActiveNavLink();
+            });
+
+        function setActiveNavLink() {
+            const path = window.location.pathname;
+            const page = path.split("/").pop();
+            document.querySelectorAll('.nav-item a').forEach(link => {
+                if (link.getAttribute('href') === page) {
+                    link.parentElement.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
