@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriGen Navigation</title>
+    <style>
+        /* ... (Your existing CSS styles) ... */
+                /* Basic reset and page styles */
+                * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+        }
+        
+        /* Navigation bar styles */
+        .nav-sidebar {
+            width: 250px;
+            height: 100vh;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-header {
+            padding: 20px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .nav-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 0;
+        }
+        
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item a:hover {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+        }
+        
+        .nav-item.active a {
+            background-color: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+            border-left-color: #4CAF50;
+        }
+        
+        .nav-icon {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .nav-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .nav-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .settings-link {
+            display: flex;
+            align-items: center;
+            color: #777;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .settings-link:hover {
+            color: #4CAF50;
+        }
+        
+        /* Content area styles */
+        .content-area {
+            margin-left: 250px;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .placeholder-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-sidebar">
+        <div class="nav-header">
+            <div class="nav-logo">🥗</div>
+            <h2>NutriGen</h2>
+        </div>
+        <nav class="nav-menu">
+            <ul>
+                <li class="nav-item active">
+                    <a href="nutrition-chat.html" data-section="nutrition-chat">
+                        <span class="nav-icon">💬</span>
+                        <span class="nav-text">Nutrition Chat</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="deficiency-detector.html" data-section="Deficiency-Detector">
+                        <span class="nav-icon">🩺</span>
+                        <span class="nav-text">Deficiency Detector</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="meal-planner.html" data-section="Meal-Planner">
+                        <span class="nav-icon">🍽️</span>
+                        <span class="nav-text">Meal Planner</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="nutrition-analysis.html" data-section="Nutrition-Analysis">
+                        <span class="nav-icon">🔢</span>
+                        <span class="nav-text">Nutrition Analysis</span>
+                    </a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a href="fitness-nutrition.html" data-section="fitness-nutrition">
+                        <span class="nav-icon">🏋️</span>
+                        <span class="nav-text">Fitness Nutrition</span>
+                    </a>
+                </li> -->
+            </ul>
+        </nav>
+        <!-- <div class="nav-footer">
+            <a href="settings.html" class="settings-link">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Settings</span>
+            </a>
+        </div>
+    </div> -->
+
+    <!-- <div class="content-area">
+        <div class="placeholder-content">
+            <h1>Welcome to NutriGen</h1>
+            <p>Select an option from the navigation menu to get started with your nutrition journey.</p>
+        </div>
+    </div> -->
+
+    <script>
+        // Basic navigation functionality (keep this for active styling)
+        document.querySelectorAll('.nav-item a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Remove active class from all menu items
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Add active class to clicked menu item
+                this.parentElement.classList.add('active');
+
+                // No need to update content, as we are redirecting
+            });
+        });
+    </script>
+</body>
+</html>
